@@ -1,38 +1,52 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package bomberman;
-
+import java.util.Random; 
 /**
- *
- * @author Mariana
+ * @author Mariana e Luiz
  */
 public class Labirinto {
-    private ElementoLabirinto ElementoLabirinto[][];
-    private int largura; 
-    private int altura; 
+    private ElementoLabirinto[][] matriz;
+    private int largura= 20; 
+    private int altura = 20; 
+    private Personagem personagem;
 
-    public Labirinto(ElementoLabirinto[][] ElementoLabirinto, int largura, int altura) {
-        this.ElementoLabirinto = ElementoLabirinto;
-        this.largura = largura;
-        this.altura = altura;
+    public Labirinto() {
+        matriz = new ElementoLabirinto[altura][largura];
     }
     
     public void gerarMapa(){
-        
+        Random random = new Random();
+        personagem = new Personagem(3,1,1,1,1);
+        matriz[1][1] = personagem;
     }
     
-    public boolean posicaoLivre(int x, int y){
-        
-        return posicaoLivre; 
+    public boolean posicaoLivre(int x, int y) {
+        if (x < 0 || x >= altura || y < 0 || y >= largura) {
+            return false;
+        }
+        return matriz[x][y] == null;
     }
     
-    public void exibirMapa(){
-        
+    public void exibirMapa() {
+        for (int i = 0; i < altura; i++) {
+            for (int j = 0; j < largura; j++) {
+
+                if (personagem.getX() == i && personagem.getY() == j) {
+                    System.out.print("P ");
+                } else if (matriz[i][j] == null) {
+                    System.out.print(". ");
+                } else {
+                    System.out.print(matriz[i][j].getSimbolo() + " ");
+                }
+            }
+            System.out.println();
+        }
     }
     
     public ElementoLabirinto obterElemento(int x, int y){
-        
+        return matriz[x][y];
+    }
+    
+    public Personagem getPersonagem(){
+        return personagem; 
     }
 }

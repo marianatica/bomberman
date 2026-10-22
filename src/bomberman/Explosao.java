@@ -11,10 +11,12 @@ public class Explosao {
     }
     
     public void propagar(){
-        
+        System.out.println("Explosao! Alcance: " + alcance);
     }
     
     public void atingirElemento(IDestrutivel e){
-        
+        if (e != null){
+            e.receberExplosao();
+        }
     }
 }

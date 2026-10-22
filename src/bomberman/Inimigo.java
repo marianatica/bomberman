@@ -10,7 +10,6 @@ public abstract class Inimigo {
         this.velocidade = velocidade;
     }
     
-    public void mover(){
-        
-    }
+    public abstract void mover();
+      
 }

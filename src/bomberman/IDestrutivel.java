@@ -5,6 +5,6 @@ package bomberman;
  */
 public interface IDestrutivel {
     
-    public void receberExplosao();
+    void receberExplosao();
     
 }
