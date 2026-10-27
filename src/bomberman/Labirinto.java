@@ -19,8 +19,10 @@ public class Labirinto {
         matriz[1][1] = personagem;
     }
     
-    public boolean posicaoLivre(int x, int y) {
+    public boolean posicaoLivre(int x, int y,Labirinto l) {
         if (x < 0 || x >= altura || y < 0 || y >= largura) {
+            return false;
+        }else if(l.obterElemento(x,y) != null){
             return false;
         }
         return matriz[x][y] == null;

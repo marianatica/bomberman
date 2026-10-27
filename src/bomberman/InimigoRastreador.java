@@ -4,13 +4,19 @@ package bomberman;
  * @author Mariana e Luiz
  */
 
-public class InimigoRastreador extends Inimigo{
+public class InimigoRastreador extends Inimigo implements IDestrutivel{
 
-    public InimigoRastreador(int velocidade) {
-        super(velocidade);
+    public InimigoRastreador(int velocidade, int x, int y) {
+        super(x,y,velocidade);
     }
-    
-    public void perseguirPersonagem(Personagem p){
-        
+
+    @Override
+    public void mover(Personagem p, Labirinto l) {
+
+    }
+
+    @Override
+    public void receberExplosao() {
+
     }
 }
