@@ -7,7 +7,7 @@ public class InimigoRegular extends Inimigo implements IDestrutivel{
 
     private Random random = new Random();
     public InimigoRegular(int velocidade, int x, int y) {
-        super(x,y,velocidade);
+        super(velocidade, x, y);
     }
     
     public void mover(Personagem p,Labirinto l) throws MovimentoInvalidoException{

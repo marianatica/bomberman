@@ -7,7 +7,7 @@ package bomberman;
 public class InimigoRastreador extends Inimigo implements IDestrutivel{
 
     public InimigoRastreador(int velocidade, int x, int y) {
-        super(x,y,velocidade);
+        super(velocidade, x, y);
     }
 
     @Override

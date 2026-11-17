@@ -3,7 +3,7 @@ package bomberman;
 /**
  * @author Mariana e Luiz
  */
-public class Personagem extends ElementoLabirinto{
+public class Personagem extends ElementoLabirinto implements IDestrutivel {
     private int vidas;
     private int bombasSimultaneas;
     private int alcanceExplosao; 
@@ -57,8 +57,8 @@ public class Personagem extends ElementoLabirinto{
         }
     }
     
-    public void gerarBomba(){
-        return new Bomba(x, y, alcanceExplosao);
+    public Bomba gerarBomba(){
+        return new Bomba(alcanceExplosao, 5, false, x, y);
     }
     
     public void receberDano(){

@@ -3,7 +3,7 @@ package bomberman;
 /**
  * @author Mariana e Luiz
  */
-public class Caixote extends ElementoLabirinto{
+public class Caixote extends ElementoLabirinto implements IDestrutivel {
     
     private boolean destruido;
     private PowerUp conteudo; 

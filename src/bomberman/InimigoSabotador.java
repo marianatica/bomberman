@@ -6,7 +6,7 @@ package bomberman;
 public class InimigoSabotador extends Inimigo implements IDestrutivel {
 
     public InimigoSabotador(int velocidade, int x, int y) {
-        super(x,y,velocidade);
+        super(velocidade, x, y);
     }
     
     public void sabotarBomba(Bomba b){
