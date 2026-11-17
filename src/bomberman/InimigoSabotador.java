@@ -7,6 +7,7 @@ public class InimigoSabotador extends Inimigo implements IDestrutivel {
 
     public InimigoSabotador(int velocidade, int x, int y) {
         super(velocidade, x, y);
+        simbolo = 'S';
     }
     
     public void sabotarBomba(Bomba b){

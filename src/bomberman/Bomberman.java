@@ -1,34 +1,34 @@
 package bomberman;
+
+import java.io.IOException;
+import java.util.Random;
 import java.util.Scanner;
+
 /**
  * @author Mariana e Luiz
  */
 public class Bomberman {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-
-        Personagem personagem = new Personagem(3, 1, 1, 1, 1);
-        Labirinto labirinto = new Labirinto();
-        labirinto.gerarMapa();
-        
-        char direcao;
-
-        do {
-            labirinto.exibirMapa();
-
-            System.out.println("Mover: W/A/S/D | Q: sair");
-            direcao = sc.next().charAt(0);
-
-            try {
-                if (Character.toUpperCase(direcao) != 'Q') {
-                    labirinto.getPersonagem().mover(direcao);
+        try (Scanner entrada = new Scanner(System.in)) {
+            Labirinto labirinto = new Labirinto(Labirinto.lerMapa(), new Random().nextLong(), false, 3);
+            while (true) {
+                labirinto.exibirMapa();
+                System.out.println("Mover: W/A/S/D | Q: sair");
+                if (!entrada.hasNext()) {
+                    return;
                 }
-            } catch (MovimentoInvalidoException e) {
-                System.out.println(e.getMessage());
+                char direcao = Character.toUpperCase(entrada.next().charAt(0));
+                if (direcao == 'Q') {
+                    return;
+                }
+                try {
+                    labirinto.getPersonagem().mover(direcao, labirinto);
+                } catch (MovimentoInvalidoException e) {
+                    System.out.println(e.getMessage());
+                }
             }
-
-        } while (Character.toUpperCase(direcao) != 'Q');
-
-        sc.close();
+        } catch (IOException | IllegalArgumentException e) {
+            System.out.println("Erro ao carregar o mapa: " + e.getMessage());
+        }
     }
 }

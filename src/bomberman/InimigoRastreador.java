@@ -8,6 +8,7 @@ public class InimigoRastreador extends Inimigo implements IDestrutivel{
 
     public InimigoRastreador(int velocidade, int x, int y) {
         super(velocidade, x, y);
+        simbolo = 'R';
     }
 
     @Override

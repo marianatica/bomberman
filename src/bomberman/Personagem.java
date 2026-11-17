@@ -27,7 +27,7 @@ public class Personagem extends ElementoLabirinto implements IDestrutivel {
         return alcanceExplosao;
     }
     
-    public void mover(char direcao) throws MovimentoInvalidoException {
+    public void mover(char direcao, Labirinto labirinto) throws MovimentoInvalidoException {
         int novoX = x;
         int novoY = y;
 
@@ -48,8 +48,7 @@ public class Personagem extends ElementoLabirinto implements IDestrutivel {
                 throw new MovimentoInvalidoException("Direcao invalida!");
         }
 
-        if ((novoX < 0 || novoX >= 20) ||
-            (novoY < 0 || novoY >= 20)) {
+        if (!labirinto.posicaoLivre(novoX, novoY)) {
             throw new MovimentoInvalidoException("Movimento invalido!");
         } else {
             this.x = novoX;

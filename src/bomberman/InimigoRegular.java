@@ -8,6 +8,7 @@ public class InimigoRegular extends Inimigo implements IDestrutivel{
     private Random random = new Random();
     public InimigoRegular(int velocidade, int x, int y) {
         super(velocidade, x, y);
+        simbolo = 'C';
     }
     
     public void mover(Personagem p,Labirinto l) throws MovimentoInvalidoException{
@@ -15,22 +16,22 @@ public class InimigoRegular extends Inimigo implements IDestrutivel{
         int novoY = y;
         switch (random.nextInt(5)) {
             case (1)://move para baixo
-                if (l.posicaoLivre(x + 1, y, l)) {
+                if (l.posicaoLivre(x + 1, y)) {
                     novoX = x + 1;
                     break;
                 }
             case (2)://move pra cima
-                if (l.posicaoLivre(x - 1, y, l)) {
+                if (l.posicaoLivre(x - 1, y)) {
                     novoX = x - 1;
                     break;
                 }
             case (3)://move pra direita
-                if (l.posicaoLivre(x, y + 1, l)) {
+                if (l.posicaoLivre(x, y + 1)) {
                     novoY = y + 1;
                     break;
                 }
             case (4)://move para esquerda
-                if (l.posicaoLivre(x, y - 1, l)) {
+                if (l.posicaoLivre(x, y - 1)) {
                     novoY = y - 1;
                     break;
                 }
