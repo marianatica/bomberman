@@ -90,11 +90,10 @@ public class Labirinto {
         }
     }
 
-    public static String[] lerMapa(boolean dificil) throws IOException {
-        String nome = dificil ? "mapa-dificil.txt" : "mapa.txt";
-        InputStream arquivo = Labirinto.class.getResourceAsStream(nome);
+    public static String[] lerMapa() throws IOException {
+        InputStream arquivo = Labirinto.class.getResourceAsStream("mapa.txt");
         if (arquivo == null) {
-            throw new IOException("Arquivo " + nome + " não encontrado.");
+            throw new IOException("Arquivo mapa.txt não encontrado.");
         }
         List<String> linhas = new ArrayList<>();
         try (Scanner leitor = new Scanner(arquivo, StandardCharsets.UTF_8.name())) {

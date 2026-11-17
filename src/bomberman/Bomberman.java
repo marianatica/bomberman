@@ -67,7 +67,7 @@ public class Bomberman {
             }
             if (dificuldade.equals("1") || dificuldade.equals("2")) {
                 boolean dificil = dificuldade.equals("2");
-                return new Partida(nome, dificil, new Random().nextLong(), Labirinto.lerMapa(dificil));
+                return new Partida(nome, dificil, new Random().nextLong(), Labirinto.lerMapa());
             }
             System.out.println("Dificuldade inválida.");
         }
