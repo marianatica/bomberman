@@ -4,6 +4,7 @@ package bomberman;
  * @author Mariana e Luiz
  */
 public class Bomba extends ElementoLabirinto {
+    private static final long serialVersionUID = 1L;
     private final int alcance;
     private int tempoRestante = 5;
     private boolean armadilha;

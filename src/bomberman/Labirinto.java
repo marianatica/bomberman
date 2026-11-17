@@ -2,8 +2,10 @@ package bomberman;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -12,13 +14,13 @@ import java.util.Scanner;
 /**
  * @author Mariana e Luiz
  */
-public class Labirinto {
+public class Labirinto implements Serializable {
+    private static final long serialVersionUID = 1L;
     static final int[][] DIRECOES = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
     private final ElementoLabirinto[][] matriz;
     private final boolean[][] fogo;
     private final List<Bomba> bombas = new ArrayList<>();
-    private final Explosao explosao = new Explosao();
     private final Random random;
     private int turno;
     private boolean jogadorAtingido;
@@ -59,7 +61,12 @@ public class Labirinto {
             throw new IllegalArgumentException("Posição inicial do jogador ausente.");
         }
         personagem = jogador;
-        livres.removeIf(celula -> distanciaDoJogador(celula[0], celula[1]) <= 2);
+        for (int i = livres.size() - 1; i >= 0; i--) {
+            int[] celula = livres.get(i);
+            if (distanciaDoJogador(celula[0], celula[1]) <= 2) {
+                livres.remove(i);
+            }
+        }
         int quantidadeInimigos = dificil ? 4 : 2;
         int quantidadeCaixotes = 18;
         if (livres.size() < quantidadeCaixotes + quantidadeInimigos) {
@@ -70,12 +77,22 @@ public class Labirinto {
             int[] celula = livres.get(i);
             int x = celula[0];
             int y = celula[1];
-            ElementoLabirinto conteudo = switch (i) {
-                case 0 -> new PortaSaida(x, y);
-                case 1, 2 -> new AumentoAlcance(x, y);
-                case 3, 4 -> new AumentoBombas(x, y);
-                default -> null;
-            };
+            ElementoLabirinto conteudo = null;
+            switch (i) {
+                case 0:
+                    conteudo = new PortaSaida(x, y);
+                    break;
+                case 1:
+                case 2:
+                    conteudo = new AumentoAlcance(x, y);
+                    break;
+                case 3:
+                case 4:
+                    conteudo = new AumentoBombas(x, y);
+                    break;
+                default:
+                    break;
+            }
             matriz[x][y] = new Caixote(conteudo, x, y);
         }
         int[] comum = livres.get(quantidadeCaixotes);
@@ -139,14 +156,23 @@ public class Labirinto {
     public void jogar(char acao) {
         Bomba nova = null;
         switch (acao) {
-            case 'W', 'A', 'S', 'D' -> personagem.mover(acao, this);
-            case 'B' -> nova = plantarBomba();
-            case 'T' -> { } // Esperar.
-            default -> throw new IllegalArgumentException("Comando inválido.");
+            case 'W':
+            case 'A':
+            case 'S':
+            case 'D':
+                personagem.mover(acao, this);
+                break;
+            case 'B':
+                nova = plantarBomba();
+                break;
+            case 'T':
+                break; // Esperar.
+            default:
+                throw new IllegalArgumentException("Comando inválido.");
         }
 
         for (boolean[] linha : fogo) {
-            java.util.Arrays.fill(linha, false);
+            Arrays.fill(linha, false);
         }
         turno++;
         jogadorAtingido = false;
@@ -159,7 +185,8 @@ public class Labirinto {
         if (inimigoEm(x, y) != null) {
             causarDanoAoJogador();
         }
-        if (matriz[x][y] instanceof PowerUp item) {
+        if (matriz[x][y] instanceof PowerUp) {
+            PowerUp item = (PowerUp) matriz[x][y];
             item.aplicar(personagem);
             matriz[x][y] = null;
         }
@@ -177,7 +204,11 @@ public class Labirinto {
                 detonar(bomba);
             }
         }
-        inimigos.removeIf(inimigo -> !inimigo.isVivo());
+        for (int i = inimigos.size() - 1; i >= 0; i--) {
+            if (!inimigos.get(i).isVivo()) {
+                inimigos.remove(i);
+            }
+        }
     }
 
     private Bomba plantarBomba() {
@@ -200,7 +231,7 @@ public class Labirinto {
 
     private void detonar(Bomba bomba) {
         bombas.remove(bomba);
-        explosao.propagar(bomba, this);
+        new Explosao().propagar(bomba, this);
     }
 
     boolean atingirCelula(int x, int y) {
@@ -209,7 +240,8 @@ public class Labirinto {
         }
         fogo[x][y] = true;
 
-        if (matriz[x][y] instanceof Caixote caixote) {
+        if (matriz[x][y] instanceof Caixote) {
+            Caixote caixote = (Caixote) matriz[x][y];
             caixote.receberExplosao();
             if (caixote.isDestruido()) {
                 matriz[x][y] = caixote.revelarConteudo();
@@ -260,8 +292,8 @@ public class Labirinto {
         for (int x = 0; x < matriz.length; x++) {
             for (int y = 0; y < matriz.length; y++) {
                 if (distanciaDoJogador(x, y) <= distancia
-                        && matriz[x][y] instanceof Caixote caixote
-                        && caixote.revelarConteudo() instanceof PowerUp) {
+                        && matriz[x][y] instanceof Caixote
+                        && ((Caixote) matriz[x][y]).revelarConteudo() instanceof PowerUp) {
                     return true;
                 }
             }
@@ -284,8 +316,11 @@ public class Labirinto {
                     System.out.print(inimigo.getSimbolo() + " ");
                 } else {
                     ElementoLabirinto elemento = matriz[x][y];
-                    if (debug && elemento instanceof Caixote caixote && caixote.revelarConteudo() != null) {
-                        elemento = caixote.revelarConteudo();
+                    if (debug && elemento instanceof Caixote) {
+                        ElementoLabirinto conteudo = ((Caixote) elemento).revelarConteudo();
+                        if (conteudo != null) {
+                            elemento = conteudo;
+                        }
                     }
                     System.out.print(elemento == null ? ". " : elemento.getSimbolo() + " ");
                 }

@@ -1,9 +1,12 @@
 package bomberman;
 
+import java.io.Serializable;
+
 /**
  * @author Mariana e Luiz
  */
-public abstract class ElementoLabirinto {
+public abstract class ElementoLabirinto implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected int x; 
     protected int y;
     protected char simbolo; 

@@ -7,6 +7,7 @@ import java.util.List;
  * @author Mariana e Luiz
  */
 public abstract class Inimigo extends ElementoLabirinto implements IDestrutivel {
+    private static final long serialVersionUID = 1L;
     private final int intervalo;
     private boolean vivo = true;
 

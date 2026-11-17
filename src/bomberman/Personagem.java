@@ -4,6 +4,7 @@ package bomberman;
  * @author Mariana e Luiz
  */
 public class Personagem extends ElementoLabirinto implements IDestrutivel {
+    private static final long serialVersionUID = 1L;
     private int vidas;
     private int bombasSimultaneas;
     private int alcanceExplosao; 

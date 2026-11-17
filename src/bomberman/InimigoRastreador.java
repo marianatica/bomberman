@@ -4,6 +4,7 @@ package bomberman;
  * @author Mariana e Luiz
  */
 public class InimigoRastreador extends Inimigo {
+    private static final long serialVersionUID = 1L;
     public InimigoRastreador(int intervalo, int x, int y) {
         super(intervalo, x, y, 'R');
     }

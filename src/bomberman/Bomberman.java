@@ -1,9 +1,8 @@
 package bomberman;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -11,7 +10,8 @@ import java.util.Scanner;
  * @author Mariana e Luiz
  */
 public class Bomberman {
-    private static final Path PARTIDA_SALVA = Path.of("partida-bomberman.txt");
+    private static final File PARTIDA_SALVA = new File("partida-bomberman.dat");
+    private static final File PARTIDA_ANTIGA = new File("partida-bomberman.txt");
 
     public static void main(String[] args) {
         try (Scanner entrada = new Scanner(System.in)) {
@@ -31,7 +31,7 @@ public class Bomberman {
                             partida = criarPartida(entrada);
                             break;
                         case "2":
-                            partida = Partida.carregar(PARTIDA_SALVA);
+                            partida = carregarPartida();
                             break;
                         default:
                             System.out.println("Opção inválida.");
@@ -40,12 +40,23 @@ public class Bomberman {
                     if (partida != null && !jogar(entrada, partida)) {
                         return;
                     }
-                } catch (NoSuchFileException e) {
+                } catch (FileNotFoundException e) {
                     System.out.println("Nenhuma partida salva encontrada.");
                 } catch (IOException | IllegalArgumentException e) {
                     System.out.println("Não foi possível iniciar a partida: " + e.getMessage());
                 }
             }
+        }
+    }
+
+    private static Partida carregarPartida() throws IOException {
+        try {
+            return Partida.carregar(PARTIDA_SALVA);
+        } catch (FileNotFoundException e) {
+            if (PARTIDA_ANTIGA.isFile()) {
+                return Partida.carregarFormatoAnterior(PARTIDA_ANTIGA);
+            }
+            throw e;
         }
     }
 
@@ -149,6 +160,13 @@ public class Bomberman {
     }
 
     private static String lerOpcao(Scanner entrada) {
-        return entrada.hasNextLine() ? entrada.nextLine().trim().toUpperCase(Locale.ROOT) : null;
+        if (!entrada.hasNextLine()) {
+            return null;
+        }
+        String opcao = entrada.nextLine().trim();
+        if (opcao.length() == 1) {
+            return String.valueOf(Character.toUpperCase(opcao.charAt(0)));
+        }
+        return opcao;
     }
 }

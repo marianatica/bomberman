@@ -1,23 +1,25 @@
 package bomberman;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class Partida {
+public class Partida implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final int MAX_DICAS = 3;
-    private static final String VERSAO = "BOMBERMAN-1";
 
     private final String nome;
     private final boolean dificil;
     private final long semente;
     private final String[] mapa;
-    private final StringBuilder historico = new StringBuilder();
     private Labirinto labirinto;
     private int dicasRestantes;
     private boolean debug;
@@ -35,7 +37,6 @@ public class Partida {
 
     public void reiniciar() {
         labirinto = new Labirinto(mapa, semente, dificil, 3);
-        historico.setLength(0);
         dicasRestantes = MAX_DICAS;
         debug = false;
     }
@@ -49,20 +50,17 @@ public class Partida {
                 throw new IllegalArgumentException("Você já usou as três dicas.");
             }
             dicasRestantes--;
-            historico.append(acao);
             return labirinto.temPowerUpPerto(3)
                     ? "Há um power-up escondido a até três células."
                     : "Nenhum power-up escondido a até três células.";
         }
         if (acao == 'G') {
             debug = !debug;
-            historico.append(acao);
             return debug ? "Modo DEBUG ativado." : "Modo DEBUG desativado.";
         }
 
         int vidasAnteriores = labirinto.getPersonagem().getVidas();
         labirinto.jogar(acao);
-        historico.append(acao);
         int vidas = labirinto.getPersonagem().getVidas();
         if (vidas > 0 && vidas < vidasAnteriores) {
             labirinto = new Labirinto(mapa, semente, dificil, vidas);
@@ -87,45 +85,75 @@ public class Partida {
                 jogador.getBombasSimultaneas(), jogador.getAlcanceExplosao(), dicasRestantes);
     }
 
-    public void salvar(Path destino) throws IOException {
-        List<String> linhas = new ArrayList<>();
-        linhas.add(VERSAO);
-        linhas.add(nome);
-        linhas.add(dificil ? "D" : "F");
-        linhas.add(Long.toString(semente));
-        linhas.add(historico.toString());
-        linhas.addAll(Arrays.asList(mapa));
-
-        Path arquivo = destino.toAbsolutePath();
-        Path temporario = Files.createTempFile(arquivo.getParent(), "bomberman-", ".tmp");
+    public void salvar(File destino) throws IOException {
+        File arquivo = destino.getAbsoluteFile();
+        File temporario = File.createTempFile("bomberman-", ".tmp", arquivo.getParentFile());
         try {
-            Files.write(temporario, linhas, StandardCharsets.UTF_8);
-            Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING);
+            try (ObjectOutputStream saida = new ObjectOutputStream(new FileOutputStream(temporario))) {
+                saida.writeObject(this);
+            }
+
+            // Guarda a versão anterior até terminar a troca do arquivo no Windows.
+            File anterior = copiaAnterior(arquivo);
+            if (arquivo.exists()) {
+                if ((anterior.exists() && !anterior.delete()) || !arquivo.renameTo(anterior)) {
+                    throw new IOException("Não foi possível preservar a partida anterior.");
+                }
+            }
+            if (!temporario.renameTo(arquivo)) {
+                throw new IOException("Não foi possível substituir o arquivo da partida.");
+            }
+            anterior.delete();
         } finally {
-            Files.deleteIfExists(temporario);
+            temporario.delete();
         }
     }
 
-    public static Partida carregar(Path origem) throws IOException {
-        List<String> linhas = Files.readAllLines(origem, StandardCharsets.UTF_8);
-        if (linhas.size() < 6 || !VERSAO.equals(linhas.get(0))) {
-            throw new IOException("Formato de partida inválido.");
+    public static Partida carregar(File origem) throws IOException {
+        File arquivo = origem.exists() ? origem : copiaAnterior(origem);
+        try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream(arquivo))) {
+            Object objeto = entrada.readObject();
+            if (!(objeto instanceof Partida)) {
+                throw new IOException("O arquivo não contém uma partida do Bomberman.");
+            }
+            return (Partida) objeto;
+        } catch (ClassNotFoundException e) {
+            throw new IOException("O arquivo contém uma classe desconhecida.", e);
         }
-        String dificuldade = linhas.get(2);
-        if (!dificuldade.equals("F") && !dificuldade.equals("D")) {
-            throw new IOException("Dificuldade da partida inválida.");
-        }
-        try {
-            long semente = Long.parseLong(linhas.get(3));
-            String[] mapa = linhas.subList(5, linhas.size()).toArray(new String[0]);
-            Partida partida = new Partida(linhas.get(1), dificuldade.equals("D"), semente, mapa);
-            // A semente e as ações reconstroem o tabuleiro, incluindo posições e fusíveis.
-            for (char acao : linhas.get(4).toCharArray()) {
-                partida.agir(acao);
+    }
+
+    private static File copiaAnterior(File arquivo) {
+        return new File(arquivo.getPath() + ".bak");
+    }
+
+    static Partida carregarFormatoAnterior(File origem) throws IOException {
+        try (BufferedReader entrada = new BufferedReader(new FileReader(origem, StandardCharsets.UTF_8))) {
+            if (!"BOMBERMAN-1".equals(entrada.readLine())) {
+                throw new IOException("Formato de partida inválido.");
+            }
+            String nome = entrada.readLine();
+            String dificuldade = entrada.readLine();
+            String semente = entrada.readLine();
+            String acoes = entrada.readLine();
+            ArrayList<String> linhas = new ArrayList<>();
+            String linha;
+            while ((linha = entrada.readLine()) != null) {
+                linhas.add(linha);
+            }
+            if (nome == null || acoes == null || linhas.isEmpty()
+                    || (!"F".equals(dificuldade) && !"D".equals(dificuldade))) {
+                throw new IOException("Dados da partida antiga incompletos.");
+            }
+
+            // Só os arquivos da versão anterior precisam reconstruir a partida pelo histórico.
+            Partida partida = new Partida(nome, "D".equals(dificuldade), Long.parseLong(semente),
+                    linhas.toArray(new String[0]));
+            for (int i = 0; i < acoes.length(); i++) {
+                partida.agir(acoes.charAt(i));
             }
             return partida;
         } catch (IllegalArgumentException | MovimentoInvalidoException | LimiteDeBombasAtingidoException e) {
-            throw new IOException("Dados da partida inválidos: " + e.getMessage(), e);
+            throw new IOException("Dados da partida antiga inválidos: " + e.getMessage(), e);
         }
     }
 }

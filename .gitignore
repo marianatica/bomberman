@@ -1,2 +1,5 @@
 /build/
 /partida-bomberman.txt
+/partida-bomberman.dat
+/partida-bomberman.dat.bak
+/bomberman-*.tmp
