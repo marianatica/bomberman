@@ -3,21 +3,19 @@ package bomberman;
 /**
  * @author Mariana e Luiz
  */
-public class InimigoSabotador extends Inimigo implements IDestrutivel {
+public class InimigoSabotador extends Inimigo {
+    public InimigoSabotador(int intervalo, int x, int y) {
+        super(intervalo, x, y, 'S');
+    }
 
-    public InimigoSabotador(int velocidade, int x, int y) {
-        super(velocidade, x, y);
-        simbolo = 'S';
-    }
-    
-    public void sabotarBomba(Bomba b){
-    }
     @Override
-    public void mover(Personagem p,Labirinto l) {
-
-    }
-    @Override
-    public void receberExplosao() {
-
+    public void mover(Personagem personagem, Labirinto labirinto) {
+        for (int[] direcao : Labirinto.DIRECOES) {
+            Bomba bomba = labirinto.bombaEm(x + direcao[0], y + direcao[1]);
+            if (bomba != null && bomba.armarArmadilha()) {
+                return;
+            }
+        }
+        moverAleatoriamente(labirinto);
     }
 }

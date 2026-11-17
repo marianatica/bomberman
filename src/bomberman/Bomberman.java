@@ -10,21 +10,38 @@ import java.util.Scanner;
 public class Bomberman {
     public static void main(String[] args) {
         try (Scanner entrada = new Scanner(System.in)) {
-            Labirinto labirinto = new Labirinto(Labirinto.lerMapa(), new Random().nextLong(), false, 3);
+            String[] mapa = Labirinto.lerMapa();
+            long semente = new Random().nextLong();
+            Labirinto labirinto = new Labirinto(mapa, semente, false, 3);
             while (true) {
                 labirinto.exibirMapa();
-                System.out.println("Mover: W/A/S/D | Q: sair");
+                Personagem jogador = labirinto.getPersonagem();
+                System.out.printf("Vidas: %d | Bombas simultâneas: %d | Raio: %d%n",
+                        jogador.getVidas(), jogador.getBombasSimultaneas(), jogador.getAlcanceExplosao());
+                System.out.println("W/A/S/D: mover | B: bomba | T: esperar | Q: sair");
                 if (!entrada.hasNext()) {
                     return;
                 }
-                char direcao = Character.toUpperCase(entrada.next().charAt(0));
-                if (direcao == 'Q') {
+                char acao = Character.toUpperCase(entrada.next().charAt(0));
+                if (acao == 'Q') {
                     return;
                 }
+                int vidas = jogador.getVidas();
                 try {
-                    labirinto.getPersonagem().mover(direcao, labirinto);
-                } catch (MovimentoInvalidoException e) {
+                    labirinto.jogar(acao);
+                } catch (MovimentoInvalidoException | LimiteDeBombasAtingidoException | IllegalArgumentException e) {
                     System.out.println(e.getMessage());
+                    continue;
+                }
+                if (labirinto.venceu() || jogador.getVidas() == 0) {
+                    labirinto.exibirMapa();
+                    System.out.println(labirinto.venceu() ? "Você venceu!" : "Fim de jogo.");
+                    return;
+                }
+                if (jogador.getVidas() < vidas) {
+                    labirinto.exibirMapa();
+                    System.out.println("Você perdeu uma vida. A fase será reiniciada.");
+                    labirinto = new Labirinto(mapa, semente, false, jogador.getVidas());
                 }
             }
         } catch (IOException | IllegalArgumentException e) {

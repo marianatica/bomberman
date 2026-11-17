@@ -57,9 +57,17 @@ public class Personagem extends ElementoLabirinto implements IDestrutivel {
     }
     
     public Bomba gerarBomba(){
-        return new Bomba(alcanceExplosao, 5, false, x, y);
+        return new Bomba(alcanceExplosao, x, y);
     }
     
+    public void aumentarAlcance() {
+        alcanceExplosao++;
+    }
+
+    public void aumentarLimiteDeBombas() {
+        bombasSimultaneas++;
+    }
+
     public void receberDano(){
         if(vidas > 0){
             vidas--; 

@@ -4,47 +4,33 @@ package bomberman;
  * @author Mariana e Luiz
  */
 public class Bomba extends ElementoLabirinto {
-    
-    private int alcance;
-    private int tempoRestante;
-    private boolean ativa;
+    private final int alcance;
+    private int tempoRestante = 5;
+    private boolean armadilha;
 
-    public Bomba(int alcance, int tempoRestante, boolean ativa, int x, int y) {
+    public Bomba(int alcance, int x, int y) {
         super(x, y, 'B');
         this.alcance = alcance;
-        this.tempoRestante = 5;
-        this.ativa = false;
     }
-    
-    public void iniciarContagem(){
-        ativa = true;
+
+    public boolean atualizarTemporizador() {
+        return !armadilha && --tempoRestante == 0;
     }
-    
-    public void atualizarTemporizador(){
-        if( ativa && tempoRestante > 0){
-            tempoRestante--;
+
+    public boolean armarArmadilha() {
+        if (armadilha || tempoRestante < 3) {
+            return false;
         }
-    }
-    
-    public void explodir(){
-        
-    }
-    
-    public void desarmar(){
-        ativa = false; 
+        armadilha = true;
+        simbolo = '#';
+        return true;
     }
 
     public int getAlcance() {
         return alcance;
     }
 
-    public int getTempoRestante() {
-        return tempoRestante;
+    public boolean isArmadilha() {
+        return armadilha;
     }
-
-    public boolean isAtiva() {
-        return ativa;
-    }
-    
-    
 }

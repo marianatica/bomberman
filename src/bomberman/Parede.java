@@ -6,7 +6,7 @@ package bomberman;
 public class Parede extends ElementoLabirinto {
     
     public Parede(int x, int y) {
-        super(x, y, '█');
+        super(x, y, 'X');
     }
     
     public boolean bloquearPassagem(){
