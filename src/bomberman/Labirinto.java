@@ -90,10 +90,11 @@ public class Labirinto {
         }
     }
 
-    public static String[] lerMapa() throws IOException {
-        InputStream arquivo = Labirinto.class.getResourceAsStream("mapa.txt");
+    public static String[] lerMapa(boolean dificil) throws IOException {
+        String nome = dificil ? "mapa-dificil.txt" : "mapa.txt";
+        InputStream arquivo = Labirinto.class.getResourceAsStream(nome);
         if (arquivo == null) {
-            throw new IOException("Arquivo mapa.txt não encontrado.");
+            throw new IOException("Arquivo " + nome + " não encontrado.");
         }
         List<String> linhas = new ArrayList<>();
         try (Scanner leitor = new Scanner(arquivo, StandardCharsets.UTF_8.name())) {
@@ -256,7 +257,20 @@ public class Labirinto {
         return Math.abs(personagem.getX() - x) + Math.abs(personagem.getY() - y);
     }
 
-    public void exibirMapa() {
+    public boolean temPowerUpPerto(int distancia) {
+        for (int x = 0; x < matriz.length; x++) {
+            for (int y = 0; y < matriz.length; y++) {
+                if (distanciaDoJogador(x, y) <= distancia
+                        && matriz[x][y] instanceof Caixote caixote
+                        && caixote.revelarConteudo() instanceof PowerUp) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void exibirMapa(boolean debug) {
         for (int x = 0; x < matriz.length; x++) {
             for (int y = 0; y < matriz.length; y++) {
                 Inimigo inimigo = inimigoEm(x, y);
@@ -271,15 +285,14 @@ public class Labirinto {
                     System.out.print(inimigo.getSimbolo() + " ");
                 } else {
                     ElementoLabirinto elemento = matriz[x][y];
+                    if (debug && elemento instanceof Caixote caixote && caixote.revelarConteudo() != null) {
+                        elemento = caixote.revelarConteudo();
+                    }
                     System.out.print(elemento == null ? ". " : elemento.getSimbolo() + " ");
                 }
             }
             System.out.println();
         }
-    }
-
-    public ElementoLabirinto obterElemento(int x, int y) {
-        return matriz[x][y];
     }
 
     public Personagem getPersonagem() {
